@@ -7,7 +7,7 @@
         public string Title { get; set; }
         public DateTime StartDate = DateTime.Now;
 
-        ICollection<Module> Modules { get; set; } = new List<Module>();
+        public ICollection<Module> Modules { get; set; } = new List<Module>();
 
     }
 }

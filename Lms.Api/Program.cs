@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Lms.Api.Data;
+using Lms.Api.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<LmsApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LmsApiContext") ?? throw new InvalidOperationException("Connection string 'LmsApiContext' not found.")));
@@ -16,6 +18,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -26,6 +29,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.SeedDataAsync().GetAwaiter().GetResult();
 
 app.MapControllers();
 

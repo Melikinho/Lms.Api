@@ -15,65 +15,51 @@ namespace Lms.Data.Data
         private static LmsApiContext db = default!;
         public static async Task InitAsync(LmsApiContext context)
         {
-            //var faker = new Faker("sv");
-            //var courses = new List<Course>();
+
 
             if (context == null) throw new ArgumentNullException(nameof(context));
             db = context;
 
             var courses = GetCourses();
-            await db.Course.AddRangeAsync(courses);
+            db.AddRange(courses);
 
-            var modules = GetModules();
-            await db.Module!.AddRangeAsync();
-
-
-            if (await db.Course.AnyAsync()) return;
+            if (db.Course.Any()) return;
 
             await db.SaveChangesAsync();
         }
 
-        private static IEnumerable<Module> GetModules()
-        {
-            return new[]
-            {
-            new Module()
-            {
-                Id = 1,
-                Title = "Programming",
-                StartDate = DateTime.Now,
-                CourseId = 1
-            },
-            new Module()
-            {
-                Id = 2,
-                Title = "Language",
-                StartDate = DateTime.Now,
-                CourseId = 2
-            }
-
-        };
-
-        }
-
         private static IEnumerable<Course> GetCourses()
         {
-            return new[]
+            var courses = new List<Course>();
+            var faker = new Faker("sv");
+            for (int i = 0; i < 10; i++)
             {
-                new Course()
-            {
-                Id = 1,
-                Title = "Programming Course",
-                StartDate = DateTime.Today.AddDays(3).AddHours(7)
-            },
-                new Course()
+                var data = new Course()
                 {
-                    Id = 2,
-                    Title = "Math Course",
-                    StartDate = DateTime.Today.AddDays(2).AddHours(6)
-                }
-        };
+                    Title = faker.Random.Word(),
+                    StartDate = faker.Date.Soon()
+                };
+                data.Modules = GetModules(data);
+                courses.Add(data);
+            }
+            return courses;
+        }
 
+        private static ICollection<Module> GetModules(Course course)
+        {
+
+            var modules = new List<Module>();
+            var faker = new Faker("sv");
+            for (int i = 0; i < faker.Random.Int(0,20); i++)
+            {
+                var data = new Module()
+                {
+                    Title = faker.Random.Word(),
+                    StartDate = faker.Date.Soon()
+                };
+                modules.Add(data);
+            }
+            return modules;
         }
     }
 }
