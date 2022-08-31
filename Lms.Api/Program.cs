@@ -17,6 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.SeedDataAsync().GetAwaiter().GetResult();
 
 
 // Configure the HTTP request pipeline.
@@ -29,7 +30,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-app.SeedDataAsync().GetAwaiter().GetResult();
+
 
 app.MapControllers();
 
