@@ -25,7 +25,7 @@ namespace Lms.Data.Data
             await db.Course.AddRangeAsync(courses);
 
             var modules = GetModules();
-            await db.Module.AddRangeAsync();
+            await db.Module!.AddRangeAsync();
 
 
             if (await db.Course.AnyAsync()) return;
