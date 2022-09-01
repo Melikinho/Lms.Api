@@ -1,6 +1,7 @@
 ﻿using Lms.Api.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,34 +22,47 @@ namespace Lms.Data.Repositories
             _context.Add(course);
         }
 
-        public Task<bool> AnyAsync(int? id)
+        public async Task<bool> AnyAsync(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            return await _context.Course.AnyAsync(i => i.Id == id);
         }
 
-        public Task<Course> FindAsync(int? id)
+        public async Task<Course> FindAsync(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            var course = await _context.Course.Include(i => i.Modules).FirstOrDefaultAsync(i => i.Id == id);
+
+            if (course == null)
+                throw new DirectoryNotFoundException();
+            return course;
         }
 
-        public Task<IEnumerable<Course>> GetAllCourses()
+        public async Task<IEnumerable<Course>> GetAllCourses()
         {
-            throw new NotImplementedException();
+            var query = _context.Course.Include(i => i.Modules);
+            var answer = await query.ToListAsync();
+            return answer;
         }
 
-        public Task<Course> GetCourse(int? id)
+        public async Task<Course> GetCourse(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            var course = await _context.Course.Include(i => i.Modules).FirstOrDefaultAsync(i => i.Id == id);
+            if (course == null)
+                throw new DirectoryNotFoundException();
+
+            return course;
         }
 
         public void Remove(Course course)
         {
-            throw new NotImplementedException();
+            _context.Remove(course);
         }
 
         public void Update(Course course)
         {
-            throw new NotImplementedException();
+            _context.Update(course);
         }
     }
 }
