@@ -1,6 +1,7 @@
 ﻿using Lms.Api.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,34 +22,40 @@ namespace Lms.Data.Repositories
             _context.Add(module);
         }
 
-        public Task<bool> AnyAsync(int? id)
+        public async Task<bool> AnyAsync(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            return await _context.Module!.AnyAsync(i => i.Id == id);
         }
 
-        public Task<Module> FindAsync(int? id)
+        public async Task<Module> FindAsync(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            return await _context.Module.FindAsync(id);
         }
 
-        public Task<IEnumerable<Module>> GetAllModules()
+        public async Task<IEnumerable<Module>> GetAllModules()
         {
-            throw new NotImplementedException();
+            return await _context.Module!.ToListAsync();
         }
 
-        public Task<Module> GetModule(int? id)
+        public async Task<Module> GetModule(int? id)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            var modules = await _context.Module!.FindAsync(id);
+            if (modules is null)
+                throw new DirectoryNotFoundException();
+            return modules;
         }
 
         public void Remove(Module module)
         {
-            throw new NotImplementedException();
+            _context.Remove(module);
         }
 
         public void Update(Module module)
         {
-            throw new NotImplementedException();
+            _context.Update(module);
         }
     }
 }
