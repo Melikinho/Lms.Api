@@ -28,10 +28,10 @@ namespace Lms.Data.Repositories
             return await _context.Module!.AnyAsync(i => i.Id == id);
         }
 
-        public async Task<Module> FindAsync(int? id)
+        public async Task<Module?> FindAsync(int? id)
         {
             ArgumentNullException.ThrowIfNull(id);
-            return await _context.Module.FindAsync(id);
+            return await _context.Module!.FindAsync(id);
         }
 
         public async Task<IEnumerable<Module>> GetAllModules()

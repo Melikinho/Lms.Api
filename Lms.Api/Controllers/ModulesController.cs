@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lms.Api.Data;
 using Lms.Core.Entities;
+using Lms.Core.Repositories;
 
 namespace Lms.Api.Controllers
 {
@@ -14,40 +15,40 @@ namespace Lms.Api.Controllers
     [ApiController]
     public class ModulesController : ControllerBase
     {
-        private readonly LmsApiContext _context;
+        private readonly IUoW UoW;
 
-        public ModulesController(LmsApiContext context)
+        public ModulesController(IUoW UoW )
         {
-            _context = context;
+            this.UoW = UoW;
         }
 
         // GET: api/Modules
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Module>>> GetModule()
         {
-          if (_context.Module == null)
+          if (UoW.ModuleRepository == null)
           {
               return NotFound();
           }
-            return await _context.Module.ToListAsync();
+            return Ok();
         }
 
         // GET: api/Modules/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Module>> GetModule(int id)
         {
-          if (_context.Module == null)
+          if (UoW.ModuleRepository == null)
           {
               return NotFound();
           }
-            var @module = await _context.Module.FindAsync(id);
+            var @module = await UoW.ModuleRepository.FindAsync(id);
 
             if (@module == null)
             {
                 return NotFound();
             }
 
-            return @module;
+            return Ok(GetModule());
         }
 
         // PUT: api/Modules/5
@@ -60,25 +61,12 @@ namespace Lms.Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(@module).State = EntityState.Modified;
+            //UoW.Entry(@module).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ModuleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                await UoW.CompleteAsync();
 
-            return NoContent();
+
+            return Ok();
         }
 
         // POST: api/Modules
@@ -86,12 +74,12 @@ namespace Lms.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Module>> PostModule(Module @module)
         {
-          if (_context.Module == null)
+          if (UoW.ModuleRepository == null)
           {
               return Problem("Entity set 'LmsApiContext.Module'  is null.");
           }
-            _context.Module.Add(@module);
-            await _context.SaveChangesAsync();
+            UoW.ModuleRepository.Add(@module);
+            await UoW.CompleteAsync();
 
             return CreatedAtAction("GetModule", new { id = @module.Id }, @module);
         }
@@ -100,25 +88,25 @@ namespace Lms.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteModule(int id)
         {
-            if (_context.Module == null)
+            if (UoW.ModuleRepository == null)
             {
                 return NotFound();
             }
-            var @module = await _context.Module.FindAsync(id);
+            var @module = await UoW.ModuleRepository.FindAsync(id);
             if (@module == null)
             {
                 return NotFound();
             }
 
-            _context.Module.Remove(@module);
-            await _context.SaveChangesAsync();
+            UoW.ModuleRepository.Remove(@module);
+            await UoW.CompleteAsync();
 
-            return NoContent();
+            return Ok();
         }
 
-        private bool ModuleExists(int id)
-        {
-            return (_context.Module?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        //private bool ModuleExists(int id)
+        //{
+        //    return (_context.Module?.Any(e => e.Id == id)).GetValueOrDefault();
+        //}
     }
 }

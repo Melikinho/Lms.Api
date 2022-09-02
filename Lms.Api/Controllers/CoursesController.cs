@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lms.Api.Data;
 using Lms.Core.Entities;
+using Lms.Core.Repositories;
+using Lms.Data.Repositories;
 
 namespace Lms.Api.Controllers
 {
@@ -14,33 +16,34 @@ namespace Lms.Api.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly LmsApiContext _context;
+        private readonly IUoW UoW;
 
-        public CoursesController(LmsApiContext context)
+        public CoursesController(IUoW uow)
         {
-            _context = context;
+            UoW = uow;
         }
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourse()
+        public async Task<ActionResult<IEnumerable<Course>>> GetCourse(bool includeModules)
         {
-          if (_context.Course == null)
+            var courses = await UoW.CourseRepository.GetAllCourses(includeModules);
+          if (UoW.CourseRepository == null)
           {
               return NotFound();
           }
-            return await _context.Course.ToListAsync();
+            return Ok(courses);
         }
 
         // GET: api/Courses/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Course>> GetCourse(int id)
         {
-          if (_context.Course == null)
+          if (UoW.CourseRepository == null)
           {
               return NotFound();
           }
-            var course = await _context.Course.FindAsync(id);
+            var course = await UoW.CourseRepository.FindAsync(id);
 
             if (course == null)
             {
@@ -55,30 +58,11 @@ namespace Lms.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCourse(int id, Course course)
         {
-            if (id != course.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(course).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            //await UoW.CourseRepository.FindAsync(id, false);
+            if (course is null)
+                return NotFound();
+            await UoW.CompleteAsync();
+            return Ok(course);
         }
 
         // POST: api/Courses
@@ -86,12 +70,12 @@ namespace Lms.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
-          if (_context.Course == null)
+          if (UoW.CourseRepository == null)
           {
               return Problem("Entity set 'LmsApiContext.Course'  is null.");
           }
-            _context.Course.Add(course);
-            await _context.SaveChangesAsync();
+            UoW.CourseRepository.Add(course);
+            await UoW.CompleteAsync();
 
             return CreatedAtAction("GetCourse", new { id = course.Id }, course);
         }
@@ -100,25 +84,25 @@ namespace Lms.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            if (_context.Course == null)
+            if (UoW.CourseRepository == null)
             {
                 return NotFound();
             }
-            var course = await _context.Course.FindAsync(id);
+            var course = await UoW.CourseRepository.FindAsync(id);
             if (course == null)
             {
                 return NotFound();
             }
 
-            _context.Course.Remove(course);
-            await _context.SaveChangesAsync();
+            UoW.CourseRepository.Remove(course);
+            await UoW.CompleteAsync();
 
             return NoContent();
         }
 
-        private bool CourseExists(int id)
-        {
-            return (_context.Course?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        //private bool CourseExists(int id)
+        //{
+        //    return (UoW.CourseRepository.Any(e => e.Id == id)).GetValueOrDefault();
+        //}
     }
 }
