@@ -17,10 +17,12 @@ namespace Lms.Api.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly IUoW UoW;
+        private readonly LmsMappings lmsMappings;
 
-        public CoursesController(IUoW uow)
+        public CoursesController(IUoW uow, LmsMappings lmsMappings)
         {
-            UoW = uow;
+            this.UoW = uow;
+            this.lmsMappings = lmsMappings;
         }
 
         // GET: api/Courses

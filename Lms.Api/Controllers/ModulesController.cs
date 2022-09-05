@@ -16,10 +16,12 @@ namespace Lms.Api.Controllers
     public class ModulesController : ControllerBase
     {
         private readonly IUoW UoW;
+        private readonly LmsMappings lmsMappings;
 
-        public ModulesController(IUoW UoW )
+        public ModulesController(IUoW UoW, LmsMappings lmsMappings)
         {
             this.UoW = UoW;
+            this.lmsMappings = lmsMappings;
         }
 
         // GET: api/Modules
