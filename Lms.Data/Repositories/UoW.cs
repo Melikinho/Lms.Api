@@ -1,4 +1,4 @@
-﻿using Lms.Api.Data;
+﻿using Lms.Data.Data;
 using Lms.Core.Repositories;
 using System;
 using System.Collections.Generic;
@@ -15,12 +15,11 @@ namespace Lms.Data.Repositories
 
         public IModuleRepository ModuleRepository { get; }
 
-        public UoW()
+        public UoW(LmsApiContext _context)
         {
-            _context = _context;
+            this._context = _context;
             CourseRepository = new CourseRepository(_context);
             ModuleRepository = new ModuleRepository(_context);
-
         }
 
         public async Task CompleteAsync()

@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Lms.Api.Data;
+using Lms.Data.Data;
 using Lms.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;

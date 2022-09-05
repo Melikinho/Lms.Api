@@ -1,4 +1,4 @@
-﻿using Lms.Api.Data;
+﻿using Lms.Data.Data;
 using Lms.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;

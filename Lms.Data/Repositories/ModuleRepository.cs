@@ -1,4 +1,4 @@
-﻿using Lms.Api.Data;
+﻿using Lms.Data.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
