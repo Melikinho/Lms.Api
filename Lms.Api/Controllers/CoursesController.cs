@@ -9,6 +9,8 @@ using Lms.Data.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using Lms.Data.Repositories;
+using Lms.Core.Lms.Core.Dto;
+using AutoMapper;
 
 namespace Lms.Api.Controllers
 {
@@ -17,23 +19,20 @@ namespace Lms.Api.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly IUoW UoW;
-        private readonly LmsMappings lmsMappings;
+        private readonly IMapper mapper;
 
-        public CoursesController(IUoW uow, LmsMappings lmsMappings)
+        public CoursesController(IUoW uow, IMapper mapper)
         {
+            this.mapper = mapper;
             this.UoW = uow;
-            this.lmsMappings = lmsMappings;
         }
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetCourse(bool includeModules)
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourse(bool includeModules)
         {
             var courses = await UoW.CourseRepository.GetAllCourses(includeModules);
-          if (UoW.CourseRepository == null)
-          {
-              return NotFound();
-          }
+            var coursedto = mapper.Map<IEnumerable<CourseDto>>(courses);
             return Ok(courses);
         }
 
@@ -41,18 +40,14 @@ namespace Lms.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Course>> GetCourse(int id)
         {
-          if (UoW.CourseRepository == null)
+          if (await UoW.CourseRepository.AnyAsync(id))
           {
-              return NotFound();
+              return BadRequest();
           }
-            var course = await UoW.CourseRepository.FindAsync(id);
+            var course = await UoW.CourseRepository.GetCourse(id);
+            var courseDto = mapper.Map<CourseDto>(course);
 
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return course;
+            return Ok(courseDto);
         }
 
         // PUT: api/Courses/5
