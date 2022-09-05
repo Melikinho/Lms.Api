@@ -9,6 +9,7 @@ using Lms.Data.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using AutoMapper;
+using Lms.Core.Dto;
 
 namespace Lms.Api.Controllers
 {
@@ -27,13 +28,11 @@ namespace Lms.Api.Controllers
 
         // GET: api/Modules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Module>>> GetModule()
+        public async Task<ActionResult<IEnumerable<ModuleDto>>> GetModule()
         {
-          if (UoW.ModuleRepository == null)
-          {
-              return NotFound();
-          }
-            return Ok();
+            var modules = await UoW.ModuleRepository.GetAllModules();
+            var modulesDto = mapper.Map<IEnumerable<ModuleDto>>(modules);
+            return Ok(modulesDto);
         }
 
         // GET: api/Modules/5
