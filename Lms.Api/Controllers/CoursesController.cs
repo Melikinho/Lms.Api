@@ -38,7 +38,7 @@ namespace Lms.Api.Controllers
 
         // GET: api/Courses/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Course>> GetCourse(int id)
+        public async Task<ActionResult<CourseDto>> GetCourse(int id)
         {
           if (await UoW.CourseRepository.AnyAsync(id))
           {
@@ -55,11 +55,16 @@ namespace Lms.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCourse(int id, Course course)
         {
-            //await UoW.CourseRepository.FindAsync(id, false);
-            if (course is null)
-                return NotFound();
-            await UoW.CompleteAsync();
-            return Ok(course);
+            try
+            {
+                UoW.CourseRepository.Update(course);
+                await UoW.CompleteAsync();
+            }
+            catch(Exception)
+            {
+                return StatusCode(500);
+            }
+            return BadRequest();
         }
 
         // POST: api/Courses
