@@ -72,12 +72,15 @@ namespace Lms.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
-          if (UoW.CourseRepository == null)
-          {
-              return Problem("Entity set 'LmsApiContext.Course'  is null.");
-          }
-            UoW.CourseRepository.Add(course);
-            await UoW.CompleteAsync();
+            try
+            {
+                UoW.CourseRepository.Add(course);
+                await UoW.CompleteAsync();
+            }
+            catch(Exception)
+            {
+                return StatusCode(500);
+            }
 
             return CreatedAtAction("GetCourse", new { id = course.Id }, course);
         }
@@ -86,18 +89,27 @@ namespace Lms.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            if (UoW.CourseRepository == null)
+            if (await UoW.CourseRepository.AnyAsync(id));
             {
-                return NotFound();
+                return BadRequest();
             }
-            var course = await UoW.CourseRepository.FindAsync(id);
-            if (course == null)
+            try
             {
-                return NotFound();
+                UoW.CourseRepository.Remove(await UoW.CourseRepository.FindAsync(id));
+                await UoW.CompleteAsync();
             }
+            catch (Exception)
+            {
+                throw;
+            }
+            //var course = await UoW.CourseRepository.FindAsync(id);
+            //if (course == null)
+            //{
+            //    return NotFound();
+            //}
 
-            UoW.CourseRepository.Remove(course);
-            await UoW.CompleteAsync();
+            //UoW.CourseRepository.Remove(course);
+            //await UoW.CompleteAsync();
 
             return NoContent();
         }
