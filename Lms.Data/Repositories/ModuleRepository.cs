@@ -39,10 +39,11 @@ namespace Lms.Data.Repositories
             return await _context.Module!.ToListAsync();
         }
 
-        public async Task<Module> GetModule(int? id)
+        public async Task<Module> GetModule(string Title)
         {
-            ArgumentNullException.ThrowIfNull(id);
-            var modules = await _context.Module!.FindAsync(id);
+            var modules = await _context.Module.FirstOrDefaultAsync(i => i.Title == Title);
+            //ArgumentNullException.ThrowIfNull(id);
+            //var modules = await _context.Module!.FindAsync(id);
             if (modules is null)
                 throw new DirectoryNotFoundException();
             return modules;

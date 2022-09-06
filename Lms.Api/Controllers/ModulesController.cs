@@ -36,21 +36,13 @@ namespace Lms.Api.Controllers
         }
 
         // GET: api/Modules/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Module>> GetModule(int id)
+        [HttpGet("{title}")]
+        public async Task<ActionResult<Module>> GetModule(string Title)
         {
-          if (UoW.ModuleRepository == null)
-          {
-              return NotFound();
-          }
-            var @module = await UoW.ModuleRepository.FindAsync(id);
+            var modules = await UoW.ModuleRepository.GetModule(Title);
+            var moduleDto = mapper.Map<ModuleDto>(modules);
 
-            if (@module == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(GetModule());
+            return Ok();
         }
 
         // PUT: api/Modules/5
@@ -58,17 +50,18 @@ namespace Lms.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutModule(int id, Module @module)
         {
-            if (id != @module.Id)
+            try 
             {
-                return BadRequest();
-            }
-
-            //UoW.Entry(@module).State = EntityState.Modified;
-
+                UoW.ModuleRepository.Update(@module);
                 await UoW.CompleteAsync();
-
-
-            return Ok();
+            }
+            catch(Exception)
+            {
+                return StatusCode(500);
+            }
+            //UoW.Entry(@module).State = EntityState.Modified;
+                //await UoW.CompleteAsync();
+            return BadRequest();
         }
 
         // POST: api/Modules
@@ -76,12 +69,16 @@ namespace Lms.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Module>> PostModule(Module @module)
         {
-          if (UoW.ModuleRepository == null)
+          try 
           {
-              return Problem("Entity set 'LmsApiContext.Module'  is null.");
-          }
-            UoW.ModuleRepository.Add(@module);
-            await UoW.CompleteAsync();
+                UoW.ModuleRepository.Add(@module);
+                await UoW.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                StatusCode(500);
+            }
+
 
             return CreatedAtAction("GetModule", new { id = @module.Id }, @module);
         }
@@ -90,20 +87,24 @@ namespace Lms.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteModule(int id)
         {
-            if (UoW.ModuleRepository == null)
+            if (await UoW.ModuleRepository.AnyAsync(id));
             {
-                return NotFound();
+                return BadRequest();
             }
-            var @module = await UoW.ModuleRepository.FindAsync(id);
-            if (@module == null)
+            try
             {
-                return NotFound();
+                UoW.ModuleRepository.Remove(await UoW.ModuleRepository.FindAsync(id));
+                await UoW.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
             }
 
-            UoW.ModuleRepository.Remove(@module);
-            await UoW.CompleteAsync();
+            //UoW.ModuleRepository.Remove(@module);
+            //await UoW.CompleteAsync();
 
-            return Ok();
+            return BadRequest();
         }
 
         //private bool ModuleExists(int id)
